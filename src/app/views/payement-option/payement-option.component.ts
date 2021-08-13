@@ -160,8 +160,12 @@ export class PayementOptionComponent implements OnInit {
           .subscribe((statusData) => {
             if (statusData.data && statusData.data.status === 'success') {
               this.createTransaction();
-            } else {
+            } else if(statusData.data && statusData.data.status === 'pending') {
               this.checkSuccessSecuredFunds(statusData.data.reference);
+            } else {
+              this.loader.stop();
+              this.hasError = true;
+              this.errorMessage = "Invalid OTP"
             }
           });
       }, 5000);

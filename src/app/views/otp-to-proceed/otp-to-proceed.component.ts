@@ -98,8 +98,12 @@ export class OtpToProceedComponent implements OnInit {
           .subscribe((statusData) => {
             if (statusData.data && statusData.data.status === 'success') {
               this.createTransaction();
-            } else {
+            } else if(statusData.data && statusData.data.status === 'pending') {
               this.checkSuccessSecuredFunds(statusData.data.reference);
+            } else {
+              this.loader.stop();
+              this.hasError = true;
+              this.errorMessage = "Invalid PIN"
             }
           });
       }, 5000);
@@ -107,7 +111,7 @@ export class OtpToProceedComponent implements OnInit {
 
   createTransaction() {
     this.checkoutData['payment_id'] = this.reference;
-    this.checkoutData['price'] = Number(this.paymentData?.amount).toFixed(2);
+    this.checkoutData['price'] = Number(this.paymentData?.price).toFixed(2);
     this.checkoutData['name'] = this.businessData.trading_name;
     this.checkoutData['items'] = this.paymentData;
     this.paymentService
@@ -154,12 +158,12 @@ export class OtpToProceedComponent implements OnInit {
       .verifyPaymentOTP(data)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((response: any) => {
-        this.loader.stop();
         if (response?.status === true) {
           this.checkSuccessSecuredFunds(this.reference);
         } else {
           this.hasError = true;
-          this.errorMessage = response['message'];
+          this.loader.stop();
+          this.errorMessage = response['data']['message'];
         }
       });
   }
