@@ -131,13 +131,13 @@ export class PayementOptionComponent implements OnInit {
       .processPayment(data, this.userData.user_uid, this.isTestTransaction)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((response) => {
-        this.loader.stop();
         if (response && response.status === true) {
           this.reference = response.data.reference;
           this.paymentStatus = response.data.status;
           this.checkSuccessSecuredFunds(this.reference);
         } else {
           this.hasError = true;
+          this.loader.stop();
           this.errorMessage = `${response.message}. ${response.data.message}`;
         }
         return response;
@@ -166,6 +166,7 @@ export class PayementOptionComponent implements OnInit {
           });
       }, 5000);
     } else if(this.paymentStatus === 'send_otp'){
+      this.loader.stop();
       this.router.navigate([`/otp-to-proceed/${this.reference}`]);
     } else {
       this.paymentService
